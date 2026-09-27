@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal | Dilshaj Infotech Registrations</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23ffd8e6'/><stop offset='100%' stop-color='%23faa2ca'/></linearGradient><linearGradient id='dGrad' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='%2300c0ff'/><stop offset='100%' stop-color='%230052cc'/></linearGradient><linearGradient id='rGrad' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='%23ff409f'/><stop offset='100%' stop-color='%23b8004f'/></linearGradient></defs><rect width='100' height='100' rx='24' fill='url(%23bg)'/><text x='33%' y='68%' font-size='52' font-weight='900' font-family='sans-serif' fill='url(%23dGrad)' text-anchor='middle'>D</text><text x='69%' y='68%' font-size='52' font-weight='900' font-family='sans-serif' fill='url(%23rGrad)' text-anchor='middle'>R</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .admin-container {
+      padding: 100px 0 60px;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .filter-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+    .table-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .admin-table th, .admin-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .admin-table th {
+      background: rgba(15, 23, 42, 0.9);
+      color: #94a3b8;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+    }
+    .admin-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .status-badge.paid {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .status-badge.pending {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .action-btn {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+    .auth-gate {
+      max-width: 420px;
+      margin: 80px auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 40px 30px;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+    }
+    @media (max-width: 900px) {
+      .filter-bar {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Minimal Nav -->
+  <header class="navbar" style="position: sticky;">
+    <div class="container nav-container">
+      <a href="index.html" class="brand-logo">
+        <div class="logo-badge"><span class="d-letter">D</span><span class="r-letter">R</span></div>
+        <div class="brand-text-wrap">
+          <div class="brand-name">
+            <span class="brand-dilshaj">Dilshaj</span>
+            <span class="brand-infotech">Infotech</span>
+          </div>
+          <span class="brand-sub">Admin Console</span>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <a href="index.html" class="btn btn-outline btn-sm">← Back to Website</a>
+        <button id="logoutBtn" class="btn btn-outline btn-sm" style="display: none;">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container admin-container">
+    <!-- Auth Gate Modal / Panel -->
+    <div id="authGate" class="auth-gate">
+      <div style="font-size: 2.5rem; margin-bottom: 12px;">🔒</div>
+      <h2 style="font-size: 1.4rem; margin-bottom: 8px;">Admin Authentication</h2>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 24px;">Enter the administrator passcode to access registered student records.</p>
+      
+      <form id="adminAuthForm" style="display: flex; flex-direction: column; gap: 14px;">
+        <input type="password" id="adminPasscode" class="form-control" placeholder="Enter Admin Passcode" required autocomplete="current-password">
+        <button type="submit" class="btn btn-primary" id="authSubmitBtn">Verify & Enter</button>
+      </form>
+      <div id="authError" style="color: #fb7185; font-size: 0.85rem; margin-top: 12px; display: none;"></div>
+      <div style="margin-top: 20px; font-size: 0.78rem; color: var(--text-dim);">Default Key: <code>dilshaj_admin_2026_secure</code></div>
+    </div>
+
+    <!-- Admin Content Area -->
+    <div id="adminContent" style="display: none;">
+      <div class="admin-header">
+        <div>
+          <h1 style="font-size: 2rem;">Student Registrations</h1>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Real-time view of registrations and payment statuses</p>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button id="refreshBtn" class="btn btn-outline btn-sm">↻ Refresh Data</button>
+          <button id="exportCsvBtn" class="btn btn-primary btn-sm">📥 Export to CSV</button>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Registrations</div>
+          <div class="stat-val" id="statTotalReg">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Collections</div>
+          <div class="stat-val" id="statRevenue" style="color: #10b981;">₹0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Completed Payments</div>
+          <div class="stat-val" id="statPaidCount" style="color: #38bdf8;">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Payments</div>
+          <div class="stat-val" id="statPendingCount" style="color: #fbbf24;">0</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search by name, email, mobile, or ID...">
+        <select id="filterClass" class="form-control">
+          <option value="All">All Classes</option>
+          <option value="Class 6">Class 6</option>
+          <option value="Class 7">Class 7</option>
+          <option value="Class 8">Class 8</option>
+          <option value="Class 9">Class 9</option>
+          <option value="Class 10">Class 10</option>
+          <option value="Intermediate 1st Year">Inter 1st Year</option>
+          <option value="Intermediate 2nd Year">Inter 2nd Year</option>
+        </select>
+        <select id="filterPayment" class="form-control">
+          <option value="All">All Payments</option>
+          <option value="Completed">Completed</option>
+          <option value="Pending">Pending</option>
+        </select>
+        <button id="applyFilterBtn" class="btn btn-outline btn-sm">Filter</button>
+        <button id="resetFilterBtn" class="btn btn-outline btn-sm">Reset</button>
+      </div>
+
+      <!-- Registrations Table -->
+      <div class="table-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Reg ID</th>
+              <th>Student Name</th>
+              <th>Class</th>
+              <th>Parent Name</th>
+              <th>Mobile</th>
+              <th>School / College</th>
+              <th>District</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="registrationsTbody">
+            <tr>
+              <td colspan="9" style="text-align: center; color: var(--text-dim); padding: 30px;">Loading registrations...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const ADMIN_PASSCODE = 'dilshaj_admin_2026_secure';
+    const REG_STORAGE_KEY = 'dilshaj_registrations_store';
+
+    // Seed sample records if storage is currently empty
+    function ensureInitialData() {
+      const existing = localStorage.getItem(REG_STORAGE_KEY);
+      if (!existing || JSON.parse(existing).length === 0) {
+        const seedData = [
+          {
+            registration_id: "DIP-2609-0101",
+            student_name: "Aarav Sharma",
+            parent_name: "Vikram Sharma",
+            mobile: "9876543210",
+            email: "aarav.sharma@example.com",
+            student_class: "Class 10",
+            school: "Delhi Public School",
+            district: "Hyderabad",
+            project_interest: "Web & App Development",
+            registration_date: "2026-09-27",
+            payment_status: "Completed",
+            payment_amount: 499,
+            payment_id: "PAY-DEMO-948172"
+          },
+          {
+            registration_id: "DIP-2609-0102",
+            student_name: "Ananya Reddy",
+            parent_name: "Srinivas Reddy",
+            mobile: "9849012345",
+            email: "ananya.reddy@example.com",
+            student_class: "Intermediate 2nd Year",
+            school: "Sri Chaitanya Junior College",
+            district: "Visakhapatnam",
+            project_interest: "AI & Machine Learning",
+            registration_date: "2026-09-27",
+            payment_status: "Completed",
+            payment_amount: 499,
+            payment_id: "PAY-DEMO-449102"
+          },
+          {
+            registration_id: "DIP-2609-0103",
+            student_name: "Rohan Varma",
+            parent_name: "Kishore Varma",
+            mobile: "9123456789",
+            email: "rohan.v@example.com",
+            student_class: "Class 8",
+            school: "Kendriya Vidyalaya",
+            district: "Vijayawada",
+            project_interest: "Robotics & IoT",
+            registration_date: "2026-09-27",
+            payment_status: "Pending",
+            payment_amount: 499,
+            payment_id: ""
+          }
+        ];
+        localStorage.setItem(REG_STORAGE_KEY, JSON.stringify(seedData));
+      }
+    }
+
+    function getLocalRegistrations() {
+      try {
+        const raw = localStorage.getItem(REG_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveLocalRegistrations(list) {
+      localStorage.setItem(REG_STORAGE_KEY, JSON.stringify(list));
+    }
+
+    let isAuthenticated = localStorage.getItem('dilshaj_admin_auth') === 'true';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      ensureInitialData();
+
+      if (isAuthenticated) {
+        showAdminDashboard();
+      }
+
+      document.getElementById('adminAuthForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const passcode = document.getElementById('adminPasscode').value.trim();
+        const errorEl = document.getElementById('authError');
+        errorEl.style.display = 'none';
+
+        if (passcode === ADMIN_PASSCODE) {
+          isAuthenticated = true;
+          localStorage.setItem('dilshaj_admin_auth', 'true');
+          showAdminDashboard();
+        } else {
+          errorEl.textContent = 'Invalid administrator passcode. Please try again.';
+          errorEl.style.display = 'block';
+        }
+      });
+
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('dilshaj_admin_auth');
+        isAuthenticated = false;
+        location.reload();
+      });
+
+      document.getElementById('refreshBtn').addEventListener('click', loadData);
+      document.getElementById('applyFilterBtn').addEventListener('click', loadData);
+      document.getElementById('resetFilterBtn').addEventListener('click', () => {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('filterClass').value = 'All';
+        document.getElementById('filterPayment').value = 'All';
+        loadData();
+      });
+
+      document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
+    });
+
+    function showAdminDashboard() {
+      document.getElementById('authGate').style.display = 'none';
+      document.getElementById('adminContent').style.display = 'block';
+      document.getElementById('logoutBtn').style.display = 'inline-flex';
+      loadData();
+    }
+
+    function loadData() {
+      const records = getLocalRegistrations();
+      
+      // Calculate stats
+      const total = records.length;
+      const paidList = records.filter(r => (r.payment_status || r.paymentStatus || '').toLowerCase() === 'completed' || (r.payment_status || r.paymentStatus || '').toLowerCase() === 'paid');
+      const paidCount = paidList.length;
+      const pendingCount = total - paidCount;
+      const revenue = paidCount * 499;
+
+      document.getElementById('statTotalReg').textContent = total;
+      document.getElementById('statRevenue').textContent = `₹${revenue.toLocaleString()}`;
+      document.getElementById('statPaidCount').textContent = paidCount;
+      document.getElementById('statPendingCount').textContent = pendingCount;
+
+      // Filter
+      const search = document.getElementById('searchInput').value.trim().toLowerCase();
+      const cls = document.getElementById('filterClass').value;
+      const payment = document.getElementById('filterPayment').value;
+
+      let filtered = records;
+
+      if (search) {
+        filtered = filtered.filter(r => 
+          (r.student_name || r.studentName || '').toLowerCase().includes(search) ||
+          (r.email || '').toLowerCase().includes(search) ||
+          (r.mobile || '').includes(search) ||
+          (r.registration_id || r.registrationId || '').toLowerCase().includes(search)
+        );
+      }
+
+      if (cls !== 'All') {
+        filtered = filtered.filter(r => (r.student_class || r.studentClass) === cls);
+      }
+
+      if (payment !== 'All') {
+        filtered = filtered.filter(r => {
+          const st = (r.payment_status || r.paymentStatus || 'Pending');
+          return st.toLowerCase() === payment.toLowerCase();
+        });
+      }
+
+      const tbody = document.getElementById('registrationsTbody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-dim); padding: 30px;">No registrations found matching criteria.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(r => {
+        const id = r.registration_id || r.registrationId;
+        const name = r.student_name || r.studentName;
+        const stClass = r.student_class || r.studentClass;
+        const parent = r.parent_name || r.parentName;
+        const status = r.payment_status || r.paymentStatus || 'Pending';
+        const isPaid = status.toLowerCase() === 'completed' || status.toLowerCase() === 'paid';
+
+        return `
+          <tr>
+            <td><strong style="color: var(--secondary);">${id}</strong></td>
+            <td><strong>${name}</strong><br><span style="color: var(--text-dim); font-size: 0.8rem;">${r.email}</span></td>
+            <td>${stClass}</td>
+            <td>${parent}</td>
+            <td>${r.mobile}</td>
+            <td>${r.school}</td>
+            <td>${r.district}</td>
+            <td>
+              <span class="status-badge ${isPaid ? 'paid' : 'pending'}">
+                ${status}
+              </span>
+            </td>
+            <td>
+              <button class="action-btn" onclick="togglePaymentStatus('${id}', '${status}')">
+                ${isPaid ? 'Mark Pending' : 'Mark Paid'}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    window.togglePaymentStatus = function(regId, currentStatus) {
+      const isCurrentlyPaid = currentStatus.toLowerCase() === 'completed' || currentStatus.toLowerCase() === 'paid';
+      const newStatus = isCurrentlyPaid ? 'Pending' : 'Completed';
+      
+      const records = getLocalRegistrations();
+      const item = records.find(r => (r.registration_id === regId || r.registrationId === regId));
+      if (item) {
+        item.payment_status = newStatus;
+        item.paymentStatus = newStatus;
+        if (newStatus === 'Completed') {
+          item.payment_id = item.payment_id || 'PAY-ADMIN-MANUAL';
+        }
+        saveLocalRegistrations(records);
+        loadData();
+      }
+    };
+
+    function exportToCSV() {
+      const records = getLocalRegistrations();
+      if (records.length === 0) {
+        alert('No registration records to export.');
+        return;
+      }
+
+      const headers = [
+        "Registration ID", "Student Name", "Parent Name", "Mobile", "Email",
+        "Class", "School/College", "District", "Project Interest",
+        "Registration Date", "Payment Status", "Amount (INR)", "Payment Ref"
+      ];
+
+      const rows = records.map(r => [
+        `"${r.registration_id || r.registrationId || ''}"`,
+        `"${r.student_name || r.studentName || ''}"`,
+        `"${r.parent_name || r.parentName || ''}"`,
+        `"${r.mobile || ''}"`,
+        `"${r.email || ''}"`,
+        `"${r.student_class || r.studentClass || ''}"`,
+        `"${r.school || ''}"`,
+        `"${r.district || ''}"`,
+        `"${r.project_interest || r.projectInterest || ''}"`,
+        `"${r.registration_date || r.registrationDate || ''}"`,
+        `"${r.payment_status || r.paymentStatus || 'Pending'}"`,
+        `"${r.payment_amount || r.fee || 499}"`,
+        `"${r.payment_id || ''}"`
+      ]);
+
+      const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `dilshaj_registrations_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
